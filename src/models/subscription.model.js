@@ -6,7 +6,9 @@ const subscriptionSchema = new Schema({
   // plan: { type: String, enum: ['basic', 'premium'], default: 'basic' },
   // status: { type: String, enum: ['active', 'inactive'], default: 'inactive' },
   startDate: { type: Date, default: Date.now },
-  endDate: { type: Date }
+  endDate: { type: Date },
+  deviceLimit:{type: Number, default:3},
+  deviceList:[]
 });
 
 // Add 1 month to endDate from startDate
