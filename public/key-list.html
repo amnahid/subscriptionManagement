@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key List</title>
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        h2 {
+            text-align: center;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        li:hover {
+            background-color: #f5f5f5;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #ff4d4d;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .delete-btn:hover {
+            background-color: #ff1a1a;
+        }
+    </style>
+</head>
+
+<body>
+    <nav style="background-color: #333;">
+        <ul style="list-style-type: none; margin: 0; padding: 0; overflow: hidden;">
+            <li style="float: left;">
+                <a href="/login.html"
+                    style="display: block; color: white; text-align: center; padding: 14px 16px; text-decoration: none;">Login</a>
+            </li>
+            <li style="float: left;">
+                <a href="/key-list.html"
+                    style="display: block; color: white; text-align: center; padding: 14px 16px; text-decoration: none;">Key
+                    List</a>
+            </li>
+            <li style="float: left;">
+                <a href="/key-generator.html"
+                    style="display: block; color: white; text-align: center; padding: 14px 16px; text-decoration: none;">Generate
+                    Key</a>
+            </li>
+            <!-- Add more navigation links as needed -->
+        </ul>
+    </nav>
+    <div class="container">
+        <h2>Key List</h2>
+        <input type="text" id="search" placeholder="Search...">
+        <ul id="subscription-list"></ul>
+    </div>
+
+    <script>
+        const token = localStorage.getItem('token');
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const searchInput = document.getElementById('search');
+            const subscriptionList = document.getElementById('subscription-list');
+
+            // Function to fetch and display subscriptions
+            function fetchSubscriptions() {
+                fetch('/api/subscriptions', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token // Include token in the header
+                    }
+                })
+            .then(response => response.json())
+            .then(subscriptions => {
+                subscriptionList.innerHTML = ''; // Clear previous list
+
+                subscriptions.forEach(subscription => {
+                    const li = document.createElement('li');
+                    const remainingDays = calculateRemainingDays(subscription.startDate, subscription.endDate);
+                    li.innerHTML = `<span>Key: ${subscription.key} | Start Date: ${subscription.startDate} | End Date: ${subscription.endDate} | Remaining Days: ${remainingDays}</span> <button class="delete-btn" data-key="${subscription.key}">Delete</button>`;
+                    subscriptionList.appendChild(li);
+
+                    // Delete button event listener
+                    const deleteBtn = li.querySelector('.delete-btn');
+                    deleteBtn.addEventListener('click', function () {
+                        const key = this.getAttribute('data-key');
+                        if (confirm('Are you sure you want to delete this subscription?')) {
+                            deleteSubscription(key);
+                        }
+                    });
+                });
+            })
+            .catch(error => console.error('Error fetching subscriptions:', error));
+            }
+
+        // Function to calculate remaining days
+        function calculateRemainingDays(startDate, endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const diff = end - start;
+            const oneDay = 1000 * 60 * 60 * 24;
+            return Math.floor(diff / oneDay);
+        }
+
+        // Function to delete a subscription
+        function deleteSubscription(key) {
+            fetch(`/api/subscriptions/${key}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-auth-token': token // Include token in the header
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        fetchSubscriptions(); // Refresh subscription list after deletion
+                    } else {
+                        console.error('Failed to delete subscription');
+                    }
+                })
+                .catch(error => console.error('Error deleting subscription:', error));
+        }
+
+        // Event listener for search input
+        searchInput.addEventListener('input', function () {
+            const searchTerm = searchInput.value.toLowerCase();
+            const lis = subscriptionList.querySelectorAll('li');
+            lis.forEach(li => {
+                const subscriptionDetails = li.textContent.toLowerCase();
+                if (subscriptionDetails.includes(searchTerm)) {
+                    li.style.display = 'block';
+                } else {
+                    li.style.display = 'none';
+                }
+            });
+        });
+
+        // Fetch subscriptions on page load
+        fetchSubscriptions();
+        });
+
+    </script>
+</body>
+
+</html>

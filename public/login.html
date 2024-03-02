@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        /* body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        } */
+
+        .login-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #error-message {
+            color: red;
+            margin-top: 10px;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <nav style="background-color: #333;">
+        <ul style="list-style-type: none; margin: 0; padding: 0; overflow: hidden;">
+            <li style="float: left;">
+                <a href="/login.html"
+                    style="display: block; color: white; text-align: center; padding: 14px 16px; text-decoration: none;">Login</a>
+            </li>
+            <li style="float: left;">
+                <a href="/key-list.html"
+                    style="display: block; color: white; text-align: center; padding: 14px 16px; text-decoration: none;">Key
+                    List</a>
+            </li>
+            <li style="float: left;">
+                <a href="/key-generator.html"
+                    style="display: block; color: white; text-align: center; padding: 14px 16px; text-decoration: none;">Generate Key</a>
+            </li>
+            <!-- Add more navigation links as needed -->
+        </ul>
+    </nav>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <div id="message"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('login-form');
+            const message = document.getElementById('message');
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const formData = {
+                    username: document.getElementById('username').value,
+                    password: document.getElementById('password').value
+                };
+
+                fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.token) {
+                            localStorage.setItem('token', data.token);
+                            window.location.href = '/';
+                        } else {
+                            message.innerText = 'Invalid username or password';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        message.innerText = 'An error occurred. Please try again later.';
+                    });
+            });
+        });
+
+    </script>
+</body>
+
+</html>
