@@ -12,8 +12,8 @@ app.use('/', express.static('public'))
 // MongoDB Connection
 const connectDB = async () => {
     try {
-        const conn = await mongoose.connect(process.env.MONGO_URI);
-        console.log(`MongoDB Connected: ${conn.connection.host}`);
+        const conn = await mongoose.connect(process.env.FLASH_KISS_DB);
+        console.log(`MongoDB Connected`);
     } catch (error) {
         console.log(error);
         process.exit(1);
