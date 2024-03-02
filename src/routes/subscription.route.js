@@ -37,6 +37,7 @@ router.get('/:key', async (req, res) => {
   try {
     const key = req.params.key;
     const subscriptionExpired = await isSubscriptionExpired(key);
+    console.log(subscriptionExpired)
     if(subscriptionExpired){
       res.json({
         status: "expired"
