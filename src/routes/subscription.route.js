@@ -56,12 +56,12 @@ router.get('/:key', async (req, res) => {
             });
           }
         } else {
-          // keyDetails.status = "inactive"
-          // await keyDetails.save()
+          keyDetails.status = "inactive"
+          await keyDetails.save()
           res.json({
             status: "expired",
-            // msg:"Device limit crossed. Your license key has been blocked"
-            msg: "Device limit crossed"
+            msg:"Device limit crossed. Your license key has been blocked"
+            // msg: "Device limit crossed"
           });
         }
       } else {
