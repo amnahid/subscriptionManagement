@@ -46,9 +46,7 @@ async function getRemainingSubscriptionDuration(userId) {
 async function isSubscriptionExpired(key) {
   try {
     const subscription = await Subscription.findOne({ key, endDate: { $gte: new Date() } });
-    console.log(subscription)
     if (subscription) {
-      console.log(subscription)
       return false; // Return true if subscription exists and is expired, otherwise false
     } else {
       return true;

@@ -3,9 +3,11 @@ const router = express.Router();
 const auth = require('../middleware/auth.middleware');
 const Subscription = require('../models/subscription.model');
 const { isSubscriptionExpired } = require('../logic/subscription.logic');
+const subscriptionModel = require('../models/subscription.model');
+const { $where } = require('../models/user.model');
 
 // Create a new subscription
-router.post('/',auth, async (req, res) => {
+router.post('/', auth, async (req, res) => {
   try {
     const { key } = req.body;
 
@@ -14,7 +16,7 @@ router.post('/',auth, async (req, res) => {
     });
 
     const subscription = await newSubscription.save();
-    res.json({...subscription, success:true});
+    res.json({ ...subscription, success: true });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -35,17 +37,52 @@ router.get('/', auth, async (req, res) => {
 // Get all subscriptions of a user
 router.get('/:key', async (req, res) => {
   try {
+    const deviceId = req.body.deviceId;
     const key = req.params.key;
     const subscriptionExpired = await isSubscriptionExpired(key);
-    console.log(subscriptionExpired)
-    if(subscriptionExpired){
-      res.json({
-        status: "expired"
-      });
+    if (deviceId) {
+      const keyDetails = await subscriptionModel.findOne({ key })
+      if (keyDetails.deviceList.indexOf(deviceId) == -1) {
+        if (keyDetails.deviceList.length < 3) {
+          keyDetails.deviceList.push(deviceId);
+          await keyDetails.save()
+          if (subscriptionExpired) {
+            res.json({
+              status: "expired"
+            });
+          } else {
+            res.json({
+              status: "active"
+            });
+          }
+        } else {
+          // keyDetails.status = "inactive"
+          // await keyDetails.save()
+          res.json({
+            status: "expired",
+            // msg:"Device limit crossed. Your license key has been blocked"
+            msg: "Device limit crossed"
+          });
+        }
+      } else {
+        if (subscriptionExpired) {
+          res.json({
+            status: "expired"
+          });
+        } else {
+          res.json({
+            status: "active"
+          });
+        }
+      }
+
     } else {
       res.json({
-        status: "active"
+        status: "expired",
+        // msg:"Device limit crossed. Your license key has been blocked"
+        msg: "Invalid request"
       });
+
     }
   } catch (err) {
     console.error(err.message);
@@ -56,7 +93,7 @@ router.get('/:key', async (req, res) => {
 // Cancel a subscription
 router.delete('/:key', auth, async (req, res) => {
   try {
-    let subscription = await Subscription.findOne({key:req.params.key});
+    let subscription = await Subscription.findOne({ key: req.params.key });
 
     if (!subscription) {
       return res.status(404).json({ msg: 'Subscription not found' });
@@ -67,7 +104,7 @@ router.delete('/:key', auth, async (req, res) => {
     //   return res.status(401).json({ msg: 'User not authorized' });
     // }
 
-    await Subscription.findOneAndDelete({key:req.params.key});
+    await Subscription.findOneAndDelete({ key: req.params.key });
 
     res.json({ msg: 'Subscription removed' });
   } catch (err) {
