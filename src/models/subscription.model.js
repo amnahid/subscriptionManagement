@@ -12,7 +12,7 @@ const subscriptionSchema = new Schema({
   deviceList:[{type:String}],
   Logs:[{
     time:Date,
-    
+    deviceId:String
   }]
 });
 

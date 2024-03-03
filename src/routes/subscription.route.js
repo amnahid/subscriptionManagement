@@ -42,6 +42,8 @@ router.get('/:key', async (req, res) => {
     const subscriptionExpired = await isSubscriptionExpired(key);
     if (deviceId) {
       const keyDetails = await subscriptionModel.findOne({ key })
+      keyDetails.Logs.push({ time: Date.now(), deviceId })
+      await keyDetails.save()
       if (keyDetails.deviceList.indexOf(deviceId) == -1) {
         if (keyDetails.deviceList.length < 3) {
           keyDetails.deviceList.push(deviceId);
@@ -60,7 +62,7 @@ router.get('/:key', async (req, res) => {
           await keyDetails.save()
           res.json({
             status: "expired",
-            msg:"Device limit crossed. Your license key has been blocked"
+            msg: "Device limit crossed. Your license key has been blocked"
             // msg: "Device limit crossed"
           });
         }
@@ -106,11 +108,22 @@ router.delete('/:key', auth, async (req, res) => {
 
     await Subscription.findOneAndDelete({ key: req.params.key });
 
-    res.json({ msg: 'Subscription removed' });
+    res.json({ msg: 'Subscription removed', success:true });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
 });
+
+router.get('/details/:key', auth, async (req, res) => {
+  try {
+    const key = req.params.key
+    const keyDetails = await subscriptionModel.findOne({ key })
+    res.json(keyDetails)
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  } 
+})
 
 module.exports = router;

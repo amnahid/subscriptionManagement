@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Details</title>
+    <style>
+        /* Key details container styles */
+        .key-details-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        #key-details {
+            margin-bottom: 20px;
+        }
+
+        button {
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="key-details-container">
+        <h2>Key Details</h2>
+        <div id="key-details"></div>
+        <button id="delete-key">Delete Key</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const keyDetailsContainer = document.querySelector('.key-details-container');
+            const keyDetailsElement = document.getElementById('key-details');
+            const deleteKeyButton = document.getElementById('delete-key');
+
+            // Function to fetch key details
+            function fetchKeyDetails() {
+                // Retrieve token from local storage
+                const token = localStorage.getItem('token');
+                const urlParams = new URLSearchParams(window.location.search);
+                const key = urlParams.get('key');
+
+                fetch(`/api/subscriptions/details/${key}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        renderKeyDetails(data);
+                    })
+                    .catch(error => console.error('Error fetching key details:', error));
+            }
+
+            // Function to render key details
+            function renderKeyDetails(keyDetails) {
+                keyDetailsElement.innerHTML = `
+      <p><strong>User:</strong> ${keyDetails.user}</p>
+      <p><strong>Key:</strong> ${keyDetails.key}</p>
+      <p><strong>Status:</strong> ${keyDetails.status}</p>
+      <p><strong>Start Date:</strong> ${new Date(keyDetails.startDate).toLocaleString()}</p>
+      <p><strong>End Date:</strong> ${new Date(keyDetails.endDate).toLocaleString()}</p>
+      <p><strong>Device Limit:</strong> ${keyDetails.deviceLimit}</p>
+      <p><strong>Device List:</strong> ${keyDetails.deviceList.join(', ')}</p>
+      <p><strong>Logs:</strong> ${keyDetails.Logs.map(log => `<br>&nbsp&nbsp&nbsp&nbsp${log.time} | ${log.deviceId}<br>`)}</p>
+    `;
+            }
+
+            // Event listener for delete key button
+            deleteKeyButton.addEventListener('click', function () {
+                // Retrieve token from local storage
+                const token = localStorage.getItem('token');
+                const urlParams = new URLSearchParams(window.location.search);
+                const key = urlParams.get('key');
+
+                fetch(`/api/subscriptions/${key}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-auth-token': token
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Key deleted successfully');
+                            // Redirect to key list page after deletion
+                            window.location.href = '/key-list.html';
+                        } else {
+                            console.error('Error deleting key:', data.message);
+                        }
+                    })
+                    .catch(error => console.error('Error deleting key:', error));
+            });
+
+            // Fetch and render key details on page load
+            fetchKeyDetails();
+        });
+
+    </script>
+</body>
+
+</html>
