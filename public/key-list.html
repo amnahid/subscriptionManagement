@@ -27,7 +27,7 @@
             padding: 0;
         }
 
-        li {
+        #keyList {
             border: 1px solid #ddd;
             padding: 10px;
             margin-bottom: 10px;
@@ -101,6 +101,7 @@
 
                 subscriptions.forEach(subscription => {
                     const li = document.createElement('li');
+                    li.setAttribute("id", "keyList")
                     const remainingDays = calculateRemainingDays(subscription.startDate, subscription.endDate);
                     li.innerHTML = `<span>Key: <a href="/key-details.html?key=${subscription.key}">${subscription.key}</a> | User: ${subscription.user} | Start Date: ${subscription.startDate} | End Date: ${subscription.endDate} | Remaining Days: ${remainingDays}</span> <button class="delete-btn" data-key="${subscription.key}">Delete</button>`;
                     subscriptionList.appendChild(li);
