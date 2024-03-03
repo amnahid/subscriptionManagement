@@ -9,7 +9,11 @@ const subscriptionSchema = new Schema({
   startDate: { type: Date, default: Date.now },
   endDate: { type: Date },
   deviceLimit:{type: Number, default:3},
-  deviceList:[{type:String}]
+  deviceList:[{type:String}],
+  Logs:[{
+    time:Date,
+    
+  }]
 });
 
 // Add 1 month to endDate from startDate
