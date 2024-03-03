@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const subscriptionSchema = new Schema({
-  key: { type: String, require: true, unique:true },
+  user: { type: String, required: true},
+  key: { type: String, required: true, unique:true },
   // plan: { type: String, enum: ['basic', 'premium'], default: 'basic' },
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
   startDate: { type: Date, default: Date.now },

@@ -86,6 +86,8 @@
             <div class="form-group">
                 <label for="key">Key:</label>
                 <input type="text" id="key" name="key">
+                <label for="user">User:</label>
+                <input type="user" id="user" name="user">
                 <button type="button" id="generate-key">Generate Key</button>
             </div>
             <button type="submit">Submit</button>
@@ -97,6 +99,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('key-form');
             const keyInput = document.getElementById('key');
+            const userInput = document.getElementById('user');
             const message = document.getElementById('message');
 
             // Function to generate a random key
@@ -118,6 +121,7 @@
             form.addEventListener('submit', function (event) {
                 event.preventDefault();
                 const key = keyInput.value;
+                const user = userInput.value;
 
                 // Retrieve token from local storage
                 const token = localStorage.getItem('token');
@@ -131,7 +135,7 @@
                             'Content-Type': 'application/json',
                             'x-auth-token': token // Include token in the header
                         },
-                        body: JSON.stringify({ key })
+                        body: JSON.stringify({ key, user })
                     })
                         .then(response => response.json())
                         .then(data => {

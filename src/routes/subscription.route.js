@@ -9,10 +9,10 @@ const { $where } = require('../models/user.model');
 // Create a new subscription
 router.post('/', auth, async (req, res) => {
   try {
-    const { key } = req.body;
+    const { key, user } = req.body;
 
     const newSubscription = new Subscription({
-      key
+      key, user
     });
 
     const subscription = await newSubscription.save();
