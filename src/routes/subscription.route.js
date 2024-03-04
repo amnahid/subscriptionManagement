@@ -44,29 +44,29 @@ router.get('/:key', async (req, res) => {
       const keyDetails = await subscriptionModel.findOne({ key })
       keyDetails.Logs.push({ time: Date.now(), deviceId })
       await keyDetails.save()
-      // if (keyDetails.deviceList.indexOf(deviceId) == -1) {
-      //   if (keyDetails.deviceList.length < 3) {
-      //     keyDetails.deviceList.push(deviceId);
-      //     await keyDetails.save()
-      //     if (subscriptionExpired) {
-      //       res.json({
-      //         status: "expired"
-      //       });
-      //     } else {
-      //       res.json({
-      //         status: "active"
-      //       });
-      //     }
-      //   } else {
-      //     keyDetails.status = "inactive"
-      //     await keyDetails.save()
-      //     res.json({
-      //       status: "expired",
-      //       msg: "Device limit crossed. Your license key has been blocked"
-      //       // msg: "Device limit crossed"
-      //     });
-      //   }
-      // } else {
+      if (keyDetails.deviceList.indexOf(deviceId) == -1) {
+        if (keyDetails.deviceList.length < 3) {
+          keyDetails.deviceList.push(deviceId);
+          await keyDetails.save()
+          if (subscriptionExpired) {
+            res.json({
+              status: "expired"
+            });
+          } else {
+            res.json({
+              status: "active"
+            });
+          }
+        } else {
+          keyDetails.status = "inactive"
+          await keyDetails.save()
+          res.json({
+            status: "expired",
+            msg: "Device limit crossed. Your license key has been blocked"
+            // msg: "Device limit crossed"
+          });
+        }
+      } else {
         if (subscriptionExpired) {
           res.json({
             status: "expired"
@@ -76,7 +76,7 @@ router.get('/:key', async (req, res) => {
             status: "active"
           });
         }
-      // }
+      }
 
     } else {
       res.json({
