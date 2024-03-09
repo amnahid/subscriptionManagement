@@ -4,24 +4,44 @@ const auth = require('../middleware/auth.middleware');
 const Subscription = require('../models/subscription.model');
 const { isSubscriptionExpired } = require('../logic/subscription.logic');
 const subscriptionModel = require('../models/subscription.model');
-const { $where } = require('../models/user.model');
 
 // Create a new subscription
 router.post('/', auth, async (req, res) => {
   try {
-    const { key, user } = req.body;
+    const { key, user, deviceLimit, month } = req.body;
 
     const newSubscription = new Subscription({
-      key, user
+      key, user, deviceLimit, month
     });
 
     const subscription = await newSubscription.save();
-    res.json({ ...subscription, success: true });
+    res.json({ ...subscription._doc, success: true });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
+});
+
+router.patch('/:key', auth, async (req, res) => {
+  try {
+    const { user, deviceLimit, month, status } = req.body;
+    const key = req.params.key;
+
+    console.log(req.body)
+    const setMonth = Number(month);
+    const setDeviceLimit = Number(deviceLimit);
+
+    const newSubscription = { user, month: setMonth, deviceLimit:setDeviceLimit , status };
+
+    const subscription = await Subscription.findOneAndUpdate({ key }, { ...newSubscription }, { new: true });
+    res.json({ ...subscription._doc, success: true });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
   }
-});
+
+})
+
 
 // Define routes
 router.get('/', auth, async (req, res) => {
@@ -45,7 +65,7 @@ router.get('/:key', async (req, res) => {
       keyDetails.Logs.push({ time: Date.now(), deviceId })
       await keyDetails.save()
       if (keyDetails.deviceList.indexOf(deviceId) == -1) {
-        if (keyDetails.deviceList.length < 3) {
+        if (keyDetails.deviceList.length < keyDetails.deviceLimit) {
           keyDetails.deviceList.push(deviceId);
           await keyDetails.save()
           if (subscriptionExpired) {
@@ -92,6 +112,8 @@ router.get('/:key', async (req, res) => {
   }
 });
 
+
+
 // Cancel a subscription
 router.delete('/:key', auth, async (req, res) => {
   try {
@@ -108,7 +130,7 @@ router.delete('/:key', auth, async (req, res) => {
 
     await Subscription.findOneAndDelete({ key: req.params.key });
 
-    res.json({ msg: 'Subscription removed', success:true });
+    res.json({ msg: 'Subscription removed', success: true });
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
@@ -123,7 +145,7 @@ router.get('/details/:key', auth, async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send('Server Error');
-  } 
+  }
 })
 
 module.exports = router;

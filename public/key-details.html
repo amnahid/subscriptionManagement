@@ -32,8 +32,21 @@
             cursor: pointer;
         }
 
+        #edit-key {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
         button:hover {
             background-color: #c82333;
+        }
+
+        #edit-key:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
@@ -61,21 +74,30 @@
     <div class="key-details-container">
         <h2>Key Details</h2>
         <div id="key-details"></div>
+        <button id="edit-key">edit Key</button>
         <button id="delete-key">Delete Key</button>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+
             const keyDetailsContainer = document.querySelector('.key-details-container');
             const keyDetailsElement = document.getElementById('key-details');
             const deleteKeyButton = document.getElementById('delete-key');
+            const editKeyButton = document.getElementById('edit-key');
+
+            editKeyButton.addEventListener("click", () => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const key = urlParams.get('key');
+                window.location.href = `/key-edit.html?key=${key}`
+            })
 
             // Function to fetch key details
             function fetchKeyDetails() {
-                // Retrieve token from local storage
-                const token = localStorage.getItem('token');
                 const urlParams = new URLSearchParams(window.location.search);
                 const key = urlParams.get('key');
+                // Retrieve token from local storage
+                const token = localStorage.getItem('token');
 
                 fetch(`/api/subscriptions/details/${key}`, {
                     headers: {
